@@ -3,5 +3,6 @@ venvpls/
 .idea/
 test_data/temp_grad_data/*
 python_version.txt
+**__pycache___
 
 !.gitignore
