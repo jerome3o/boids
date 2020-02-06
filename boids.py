@@ -97,7 +97,9 @@ class Boid(Entity):
         pygame.draw.polygon(win, self.colour, points)
 
     def update_physics(self, actions: List[EntityAction], time_elapsed):
+
         local_boids: List[Boid] = self.flock.get_local_boids(self)
+
         direction = self.calculate_rules(local_boids, actions)
         self.n_neighbours = len(local_boids)
 
