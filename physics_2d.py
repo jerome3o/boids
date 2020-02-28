@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import numpy as np
+
 from engine import Entity
 
 
@@ -20,4 +22,6 @@ class PhysicsObject(Entity, ABC):
     def pos(self):
         pass
 
+    def distance_to(self, other):
+        return np.linalg.norm(self.pos - other.pos)
 

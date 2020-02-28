@@ -27,12 +27,12 @@ def calc_direction_matrix(diff_matrix, distance_matrix):
 
 
 def calc_mass_product_matrix(m):
-    return m[:, 0][np.newaxis, :] - m[:, 0][:, np.newaxis]
+    return m[:, 0][np.newaxis, :] * m[:, 0][:, np.newaxis]
 
 
 class GravitationalField:
     def __init__(self, g=real_gravitational_constant):
-        self.g = real_gravitational_constant
+        self.g = g
         self._gravitational_objects = []
         self._v = np.ndarray([0, 2])
         self._pos = np.ndarray([0, 2])
@@ -74,12 +74,17 @@ class GravitationalField:
         mass_product_matrix = calc_mass_product_matrix(self._m)
 
         g_force_magnitude_matrix = self.g * mass_product_matrix / distance_matrix**2
+
+        # g_force_magnitude_matrix[np.where(np.eye(g_force_magnitude_matrix.shape[0], dtype=bool))] = 0
+
         g_force_matrix = g_force_magnitude_matrix[:, :, np.newaxis] * direction_matrix
+
+        g_force_matrix[range(g_force_matrix.shape[0]), range(g_force_matrix.shape[1]), :] = 0
 
         f = np.sum(g_force_matrix, axis=1)
         self._f = f
         self._v += (self.f / self.m) * time_passed
-        self._pos = self._v * time_passed
+        self._pos = self._pos + self._v * time_passed
 
 
 class GravitationalObject(PhysicsObject, ABC):
@@ -116,11 +121,38 @@ class GravitationalObject(PhysicsObject, ABC):
 
 class Planet(GravitationalObject):
     def __init__(self, *args, size=100, **kwargs):
+        self.speed = 1
         self.size = size
         super().__init__(*args, **kwargs)
 
     def draw(self, win):
-        pygame.draw.circle(win, self.colour, self.pos, self.size)
-        pygame.draw.line(win, (255, 255, 0), self.pos, self.pos + self.v)
-        pygame.draw.line(win, (255, 0, 0), self.pos, self.pos + self.a)
+        speed = np.linalg.norm(self.v)
+        acceleration = np.linalg.norm(self.a)
+
+        screen_pos = self.pos * self.game_settings.zoom + self.game_settings.camera_pos
+
+        pygame.draw.circle(win, self.colour, screen_pos.astype(int), int(self.size*self.game_settings.zoom))
+        pygame.draw.line(win, (255, 255, 0), screen_pos.astype(int),
+                         (screen_pos + self.v/speed * np.sqrt(speed) * self.game_settings.zoom).astype(int))
+        pygame.draw.line(win, (255, 0, 0), screen_pos.astype(int),
+                         (screen_pos + self.a/acceleration * np.sqrt(acceleration) *
+                          self.game_settings.zoom).astype(int))
+
+    def update_physics(self, actions: List[EntityAction], time_elapsed):
+        if EntityAction.MOVE_DOWN in actions:
+            self.v[1] += self.speed * time_elapsed
+        if EntityAction.MOVE_UP in actions:
+            self.v[1] -= self.speed * time_elapsed
+        if EntityAction.MOVE_RIGHT in actions:
+            self.v[0] += self.speed * time_elapsed
+        if EntityAction.MOVE_LEFT in actions:
+            self.v[0] -= self.speed * time_elapsed
+
+
+class MySpaceship(Planet):
+    def centre(self):
+        self.game_settings.camera_pos[0] = (-self.pos[0]*self.game_settings.zoom + self.game_settings.window_width/2)
+        self.game_settings.camera_pos[1] = (-self.pos[1]*self.game_settings.zoom + self.game_settings.window_height/2)
+        pass
+
 

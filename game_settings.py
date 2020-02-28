@@ -1,5 +1,7 @@
 from enum import Enum, auto
 
+import numpy as np
+
 
 class MapEdgeBehaviour(Enum):
     WRAP = auto()
@@ -14,6 +16,10 @@ class GameSettings:
 
         self.map_width = 1800
         self.map_height = 800
+
+        self.camera_pos = np.array([0, 0])
+        self.zoom = 1
+        self.zoom_factor = 0.05
 
         self.is_running = True
         self.ticks_per_second = 144

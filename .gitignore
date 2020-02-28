@@ -6,3 +6,6 @@ python_version.txt
 **__pycache___
 
 !.gitignore
+__pycache__/
+
+*.pyc
