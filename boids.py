@@ -7,6 +7,8 @@ import numpy as np
 import pygame
 
 from engine import Entity, EntityAction
+from physics_2d import PhysicsObject
+
 from game_settings import GameSettings
 
 
@@ -21,8 +23,8 @@ class BoidFlock:
     def generate_boids(self, n_boids, rules=None, **kwargs):
         self._boids = [
             Boid(
-                random.randint(0, self.game_settings.map_width),
-                random.randint(0, self.game_settings.map_height),
+                pos=np.array([random.randint(0, self.game_settings.map_width),
+                              random.randint(0, self.game_settings.map_height)]),
                 game_settings=self.game_settings,
                 rules=rules,
                 flock=self,
@@ -40,7 +42,16 @@ class BoidFlock:
                 if boid.distance_to(other_boid) < boid.local_radius and boid != other_boid]
 
 
-class Boid(Entity):
+class Boid(PhysicsObject):
+
+    @property
+    def a(self):
+        return 0
+
+    @property
+    def pos(self):
+        return self._pos
+
     def __init__(self, *args, flock: BoidFlock, colour=None, rules=None, size=10, local_radius=200, max_velocity=30,
                  speed=20, **kwargs):
         super().__init__(*args, **kwargs)
@@ -85,7 +96,7 @@ class Boid(Entity):
         direction *= self.size
         perpendicular_direction = np.cross(np.array([*direction, 0]), np.array([0, 0, 1]))[:2]
 
-        centre = np.array([self.x, self.y])
+        centre = self.pos
 
         points = [
             0.5*direction + centre,
@@ -105,8 +116,7 @@ class Boid(Entity):
 
         self.v = self.v + direction * self.speed
 
-        self.x += self.v[0] * time_elapsed
-        self.y += self.v[1] * time_elapsed
+        self._pos += (self.v * time_elapsed).astype(int)
 
         # TODO: Game clock
 
@@ -213,10 +223,10 @@ class AvoidWallsRule(BoidRule):
 
     def _evaluate(self, boid: Boid, local_boids, **kwargs):
         fake_boids = np.array([
-            [0, boid.y],
-            [self.game_settings.map_width, boid.y],
-            [boid.x, 0],
-            [boid.x, self.game_settings.map_height],
+            [0, boid.pos[1]],
+            [self.game_settings.map_width, boid.pos[1]],
+            [boid.pos[0], 0],
+            [boid.pos[0], self.game_settings.map_height],
         ])
 
         direction_offsets = boid.pos - fake_boids
