@@ -56,4 +56,4 @@ other.
 Probably the most interesting part of this project for me was writing code for camera control. And learning about 
 abstracting graphics.
 
-![gravity_pic](images/gravity.PNG)
+![gravity_pic](images/gravity.png)
