@@ -11,11 +11,11 @@ class MapEdgeBehaviour(Enum):
 
 class GameSettings:
     def __init__(self):
-        self.window_width = 1800
-        self.window_height = 800
+        self.window_width = 900
+        self.window_height = 600
 
-        self.map_width = 1800
-        self.map_height = 800
+        self.map_width = 900
+        self.map_height = 600
 
         self.camera_pos = np.array([0, 0])
         self.zoom = 1

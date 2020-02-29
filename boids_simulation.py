@@ -21,7 +21,7 @@ def main():
     game_settings = GameSettings()
     # game_settings.debug = True
 
-    pygame.display.set_caption("First Game")
+    pygame.display.set_caption("Boid Simulation")
     win = pygame.display.set_mode((game_settings.window_width, game_settings.window_height))
     fill_colour = (0, 0, 0)
 
